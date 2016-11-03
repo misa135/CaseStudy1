@@ -1,0 +1,428 @@
+# Case Study 1
+Misael Santana  
+October 28, 2016  
+
+
+## Introduction
+
+Dear Data Quality Manager,
+In response to your company recent request for data exploration and evaluation of Case Study 1, Misael Datum ILC has the pleasure to submit this report to your company with the following structure:
+
+* Description of tools used 
+* Description of the data received
+    *  Importing and Tidying Gross Domestic Product data for the 190 ranked countries 
+    *  Importing FED STATS data  
+* Merging Data
+    *  Sorting dataframe “Merged2”ordered by GDP 
+* Sub setting Data
+    * Average GDP rankings for the “High income: OECD” and “High income: nonOECD”
+* Plot: GDP for all of the countries.
+* Tidying data
+    * Table GDP versus Income.Group
+    * Creating the Table GDP versus Income.Group
+    * Countries that are “Lower middle income” but among the 38 nations with highest GDP
+
+*  Conclusion
+
+I would like to thank you for your attention and consideration.
+
+Misael Santana
+
+mlsantana@smu.edu
+
+
+
+## Description of tools used 
+
+
+R was used as the language for the data treatment, statistical computing and generation of graphics.
+
+```r
+sessionInfo()
+```
+
+```
+## R version 3.3.1 (2016-06-21)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 14393)
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] magrittr_1.5    tools_3.3.1     htmltools_0.3.5 yaml_2.1.13    
+##  [5] Rcpp_0.12.7     stringi_1.1.1   rmarkdown_1.0   knitr_1.14     
+##  [9] stringr_1.1.0   digest_0.6.10   evaluate_0.9
+```
+
+The integrated development environment (IDE) for R used was RStudio:
+RStudio : Version 0.99.903 – © 2009-2016 RStudio, Inc.
+
+## Description of the data received
+
+The data was downloaded from 2 URL address supplied by the vendor, these are the references:
+
+*  Gross Domestic Product data for the 190 ranked countries:
+
+https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FGDP.csv
+
+*  Educational data:
+
+https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv
+
+####Importing and Tidying Gross Domestic Product data for the 190 ranked countries
+
+Was decided to download the data in a local drive in order to analyze his format,
+Opening the downloaded file with notepad++ was noticed the following:
+
+*  There are 5 lines of headers
+
+*  Extra comas after each line, these comas will create extra columns at the moment that this file is read back to RStudio 
+
+*  The values of the 3th column are in quotation marks and have comas.
+
+*  The last line with availbale data for GDP per country is the line 190
+*  There are 231 countries listed in this table
+
+Below we can see a two typical lines of the original data:
+
+USA,1,,United States," 16,244,600 ",,,,,
+CHN,2,,China," 8,227,103 ",,,,,
+
+After all these observation the data was read back to the dataframe GDP2012 with the following steps in order to tidy the data:
+
+1. Read back the file skipping the 5 fist lines (skip=5).
+
+2. Import with the option of no header (header=FALSE)
+
+3. Read 231 first lines (nrows=190)
+4. Delete extra columns
+5. Add Names to the columns "CountryCode","Ranking","Long Name","GDP"
+
+
+
+
+
+```r
+library(repmis)
+library(RCurl)
+```
+
+```
+## Loading required package: bitops
+```
+
+```r
+# downloading the data to local computer in the same directory of this project
+site =
+"https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FGDP.csv"
+download.file(site,destfile= "./getdata_data_GDP.csv")
+
+#reading the table back to the dataframe GDP2012
+GDP2012<-read.csv("getdata_data_GDP.csv", sep =",", header=FALSE, skip=5,nrows=231)
+#Deleting extra columns
+GDP2012<-GDP2012[-c(3,6:10)]
+#assigning names to the columns
+names(GDP2012) <- c("CountryCode","Ranking","Long Name","GDP")
+#verification of of the data in the dataframe GDP2012 
+head(GDP2012)
+```
+
+```
+##   CountryCode Ranking      Long Name          GDP
+## 1         USA       1  United States  16,244,600 
+## 2         CHN       2          China   8,227,103 
+## 3         JPN       3          Japan   5,959,718 
+## 4         DEU       4        Germany   3,428,131 
+## 5         FRA       5         France   2,612,878 
+## 6         GBR       6 United Kingdom   2,471,784
+```
+
+```r
+dim(GDP2012)
+```
+
+```
+## [1] 231   4
+```
+####Importing Fed Stats data
+
+Was decided to download the data in a local drive in order to analyze his format.
+After analyzing the structure of the data was observed that there is no need for change at this point. Therefore the data was imported back to the data frame “FEDSTATS_Country”
+
+
+
+
+```r
+# downloading the data to local computer in the same directory of this
+site =
+"https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv"
+download.file(site,destfile= "./getdata_data_FEDSTATS_Country.csv")
+
+#reading the table back to the dataframe FEDSTATS_Country
+
+FEDSTATS_Country<-read.csv("getdata_data_FEDSTATS_Country.csv", sep =",", header=TRUE)
+names(FEDSTATS_Country)
+```
+
+```
+##  [1] "CountryCode"                                      
+##  [2] "Long.Name"                                        
+##  [3] "Income.Group"                                     
+##  [4] "Region"                                           
+##  [5] "Lending.category"                                 
+##  [6] "Other.groups"                                     
+##  [7] "Currency.Unit"                                    
+##  [8] "Latest.population.census"                         
+##  [9] "Latest.household.survey"                          
+## [10] "Special.Notes"                                    
+## [11] "National.accounts.base.year"                      
+## [12] "National.accounts.reference.year"                 
+## [13] "System.of.National.Accounts"                      
+## [14] "SNA.price.valuation"                              
+## [15] "Alternative.conversion.factor"                    
+## [16] "PPP.survey.year"                                  
+## [17] "Balance.of.Payments.Manual.in.use"                
+## [18] "External.debt.Reporting.status"                   
+## [19] "System.of.trade"                                  
+## [20] "Government.Accounting.concept"                    
+## [21] "IMF.data.dissemination.standard"                  
+## [22] "Source.of.most.recent.Income.and.expenditure.data"
+## [23] "Vital.registration.complete"                      
+## [24] "Latest.agricultural.census"                       
+## [25] "Latest.industrial.data"                           
+## [26] "Latest.trade.data"                                
+## [27] "Latest.water.withdrawal.data"                     
+## [28] "X2.alpha.code"                                    
+## [29] "WB.2.code"                                        
+## [30] "Table.Name"                                       
+## [31] "Short.Name"
+```
+
+```r
+dim(FEDSTATS_Country)
+```
+
+```
+## [1] 234  31
+```
+##Merging Data
+
+Observing GDP2012 was noticed that the last 15 rows are regions and not country, the decision was made to drop these rows from the GDP2012 before the merge.
+
+```r
+#Droping tha last 15 rows.
+n<-dim(GDP2012)[1]
+GDP2012<-GDP2012[1:(n-15),]
+```
+The dataframes GDP2012 and FEDSTATS_Country were merged by the column “CountryCode", 
+
+```r
+#merging data
+merged2<-merge(GDP2012, FEDSTATS_Country, by = "CountryCode")
+
+write.csv(merged2, file = "merged2.csv")
+dim(merged2)
+```
+
+```
+## [1] 210  34
+```
+The result of this was a dataframe called "merged2" with the dimensions of 210x34". Therefore they are 210 CountryCode" that match.
+
+
+####Sorting dataframe "Merged2"ordered by GDP
+
+The sequence of operations for sorting by GDP is the following:
+
+1. Remove all the comas from the data in the column GDP
+
+2. Create a temporary column called NEWGDP in order to save the values of GDP data after removing the comas
+
+3. Sort the dataframe based in the column NEWGDP
+
+4. Delete the rows with values NA in the column NEWGDP
+
+5. Copy NEWDP to GDP
+
+6. Delete NEWGDP
+
+
+
+```r
+#REmoving comas from Merged2[,4] (merged$GDP) and assigning this new values to a new column called NEWGDP
+merged2$NEWGDP<-as.numeric(gsub(",", "", merged2[,4]))
+```
+
+```
+## Warning: NAs introduced by coercion
+```
+
+```r
+#sort column in descending order
+
+merged2<-merged2[order(-merged2$NEWGDP),]
+
+#delete the rows with values NA in the column NEWGDP
+merged2<-merged2[!(is.na(merged2$NEWGDP) ),]
+
+#coping the column NEWGDP to the column GDP
+merged2$GDP<-merged2$NEWGDP
+#Deleting the column NEWGDP
+merged2$NEWGDP     <- NULL
+
+#SAve the datafrem in the local computer
+write.csv(merged2, file = "merged3.csv")
+```
+After sorting we can verify that the 13th country in the resulting data frame is Spain.
+
+```r
+merged2$"Long Name"[13]
+```
+
+```
+## [1] Spain
+## 229 Levels:    East Asia & Pacific   Euro area ... Zimbabwe
+```
+##Sub setting Data
+####Average GDP rankings for the "High income: OECD" and "High income: nonOECD" 
+
+
+As per request, the average for the "High income: OECD" and "High income: nonOECD" was found subseting the merged2 dataframe in two subsets:
+
+*  merged3.sub for the "High income: OECD" with a average of 1483917
+
+*  merged4.sub for the "High income: nonOECD" with a average of 104349.8
+
+
+
+
+```r
+merged3.sub <- subset(merged2, Income.Group=="High income: OECD", select = c(Income.Group , GDP))
+
+mean(merged3.sub$GDP)
+```
+
+```
+## [1] 1483917
+```
+
+```r
+merged4.sub <- subset(merged2, Income.Group=="High income: nonOECD", select = c(Income.Group , GDP))
+
+
+mean(merged4.sub$GDP)
+```
+
+```
+## [1] 104349.8
+```
+##Plot:  GDP for all of the countries. 
+
+
+```r
+library(ggplot2)
+
+Income_Group=merged2$Income.Group
+
+qplot(merged2$Ranking,(merged2$GDP)/1000000, color=Income_Group, xlab = "Countries", ylab="GDP in Billions of $")
+```
+
+![](MisaelSantanaCaseStudy1Introduction_to_Data_Science__403__files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+##Tidying data
+####Table GDP versus Income.Group
+#####Separating Data
+The data was separated into Quantiles of 0%, 25%, 50%, 75%, and 100%,
+We have for lebesl of quantiles from 1 to 4. For is for the upper Income group and 1 is for the lower Income group. These levels will be saved in a new column called QLevel.  
+
+
+
+```r
+#finding the quantiles and saving in the variable brks
+brks <- with(merged2, quantile(GDP, probs = c(0, 0.25, 0.5, 0.75, 1)))
+
+#SAving the levels of quantile in the new column coled QLevel
+merged2 <- within(merged2, QLevel <- cut(merged2$GDP, breaks = brks, labels = 1:4,include.lowest = TRUE))
+
+
+#write.csv(merged2, file = "merged3WithQuartile.csv")
+```
+#####Creating the Table GDP versus Income.Group
+
+A new data frame was created called df, this dataframe will contain GDP, Income_Group, Short.name, Ranking, and Qlevel
+
+```r
+#Creating a dataframe with GDP, Income_Group Ranking Qlevel
+
+df = data.frame(merged2$GDP, merged2$Income.Group, merged2$Short.Name , merged2$Ranking, merged2$QLevel)  
+
+
+head(df)
+```
+
+```
+##   merged2.GDP merged2.Income.Group merged2.Short.Name merged2.Ranking
+## 1    16244600    High income: OECD      United States               1
+## 2     8227103  Lower middle income              China               2
+## 3     5959718    High income: OECD              Japan               3
+## 4     3428131    High income: OECD            Germany               4
+## 5     2612878    High income: OECD             France               5
+## 6     2471784    High income: OECD     United Kingdom               6
+##   merged2.QLevel
+## 1              4
+## 2              4
+## 3              4
+## 4              4
+## 5              4
+## 6              4
+```
+####Countries that are "Lower middle income" but among the 38 nations with highest GDP
+
+A dataframe called newdata was created in order to filter the countries that are "Lower middle income" but among the 38 nations with highest GDP. This table contain five countries as showed below:
+
+
+
+
+```r
+newdata <- df[ which(df$merged2.Income.Group=='Lower middle income' & df$merged2.Ranking < 39), ]
+colnames(newdata) <- c("GDP", "Income_Group", "Name", "Ranking", "Quantile level")
+newdata
+```
+
+```
+##        GDP        Income_Group      Name Ranking Quantile level
+## 2  8227103 Lower middle income     China       2              4
+## 10 1841710 Lower middle income     India      10              4
+## 16  878043 Lower middle income Indonesia      16              4
+## 31  365966 Lower middle income  Thailand      31              4
+## 38  262832 Lower middle income     Egypt      38              4
+```
+
+```r
+nrow(newdata)
+```
+
+```
+## [1] 5
+```
+##Conclusion
+The process of collecting, cleaning, and consolidating data into one file or shorter files is a process that takes time, I can say more that 80% of the analysis is spending preparing data. This process generally entails correcting any errors, filling in nulls and incomplete data, and merging data.
+
+During the merging process was find out that 210 Country Short code matches, between the 2 sources of data available for this assignment.
+
+The 13th Country after merging the data was Spain
+
+The average for “High income: OECD” is USD 1,483,917
+
+The average for the “High income: nonOECD” is USD 104,349.8
+
+There are five countries in the category of Lower middle income but among the 38 nations with highest
+GDP. These countries are: China, India, Indonesia, Thailand, and Egypt
+
